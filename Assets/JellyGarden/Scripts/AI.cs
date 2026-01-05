@@ -65,6 +65,7 @@ public class AI : MonoBehaviour
 	{
 		if (square == null)
 			return;
+		
 		if (square.item != null)
 		{
 			if (square.item.color == COLOR)
@@ -77,7 +78,6 @@ public class AI : MonoBehaviour
 					nextMoveItems.Add(square.item);
 			}
 		}
-
 	}
 
 	public List<Item> GetCombine()
@@ -480,6 +480,7 @@ public class AI : MonoBehaviour
 
 
 			}
+
 			//if we don't get any tip.  call nomatches to regenerate level
 			if (!LevelManager.THIS.DragBlocked)
 			{
@@ -494,12 +495,12 @@ public class AI : MonoBehaviour
 			StartCoroutine(CheckPossibleCombines());
 
 		// }
+
 	}
 
 	//show tip function calls coroutine for
 	void showTip(List<Item> nextMoveItems)
 	{
-		//        print("show tip");
 		StopCoroutine(showTipCor(nextMoveItems));
 		StartCoroutine(showTipCor(nextMoveItems));
 	}

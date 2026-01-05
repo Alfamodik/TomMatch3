@@ -9,6 +9,7 @@ public class Level : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		Debug.Log("[Level] Start - Begin");
         if( PlayerPrefs.GetInt( "Score" + (number-1) ) > 0  )
         {
             lockimage.gameObject.SetActive( false );
@@ -26,6 +27,7 @@ public class Level : MonoBehaviour {
 
         }
 
+        Debug.Log("[Level] Start - End");
 	}
 	
 	// Update is called once per frame

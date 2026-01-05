@@ -3,24 +3,9 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
-#if UNITY_ADS
-using JellyGarden.Scripts.Integrations;
-using UnityEngine.Advertisements;
-#endif
-
-#if CHARTBOOST_ADS
-using ChartboostSDK;
-#endif
-#if GOOGLE_MOBILE_ADS
-using GoogleMobileAds.Api;
-#endif
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
-
-#if FACEBOOK
-using Facebook.Unity;
-#endif
 
 
 public enum Target
@@ -105,28 +90,11 @@ public class InitScript : MonoBehaviour
 
     public static bool sound = false;
     public static bool music = false;
-    private bool adsReady;
-    public bool enableUnityAds;
-    public bool enableGoogleMobileAds;
-    public bool enableChartboostAds;
-    public string rewardedVideoZone;
-    public string nonRewardedVideoZone;
-    public int ShowChartboostAdsEveryLevel;
-    public int ShowAdmobAdsEveryLevel;
     public int dailyRewardedFrequency; //2.2.2
     public RewardedAdsTime dailyRewardedFrequencyTime; //2.2.3
     public int[] dailyRewardedShown;
     public DateTime[] dailyRewardedShownDate;
     private bool leftControl;
-#if GOOGLE_MOBILE_ADS
-    private InterstitialAd interstitial;
-    private AdRequest requestAdmob;
-#endif
-    public string admobUIDAndroid;
-    public string admobUIDIOS;
-    public string admobRewardedUIDAndroid;
-    public string admobRewardedUIDIOS;
-    public bool LoginEnable;
 
     public int ShowRateEvery;
     public string RateURL;
@@ -134,8 +102,6 @@ public class InitScript : MonoBehaviour
     public int rewardedGems = 5;
     public bool losingLifeEveryGame;
     public static Sprite profilePic;
-    public GameObject facebookButton;
-    private string lastResponse = string.Empty;
 
     public UnityEvent OnAdLoadedEvent;
     public UnityEvent OnAdFailedToLoadEvent;
@@ -144,28 +110,12 @@ public class InitScript : MonoBehaviour
     public UnityEvent OnUserEarnedRewardEvent;
     public UnityEvent OnAdClosedEvent;
 
-    protected string LastResponse
-    {
-        get { return this.lastResponse; }
-
-        set { this.lastResponse = value; }
-    }
-
-    private string status = "Ready";
     public string RateURLIOS; //2.1.5
-
-    protected string Status
-    {
-        get { return this.status; }
-
-        set { this.status = value; }
-    }
-
-    public UnityAdsID unityAds;
 
     // Use this for initialization
     void Awake()
     {
+        Debug.Log("[InitScript] Awake - Begin");
         Application.targetFrameRate = 60;
         Instance = this;
         RestLifeTimer = PlayerPrefs.GetFloat("RestLifeTimer");
@@ -173,6 +123,8 @@ public class InitScript : MonoBehaviour
         print(DateOfExit);
         Gems = PlayerPrefs.GetInt("Gems");
         lifes = PlayerPrefs.GetInt("Lifes");
+
+        Debug.Log("[InitScript] Awake - 1");
         {
             //2.2.2 rewarded limit
             dailyRewardedShown = new int[Enum.GetValues(typeof(RewardedAdsType)).Length];
@@ -183,6 +135,8 @@ public class InitScript : MonoBehaviour
                 dailyRewardedShownDate[i] = DateTimeManager.GetLastDateTime(((RewardedAdsType)i).ToString());
             }
         }
+
+        Debug.Log("[InitScript] Awake - 2");
         if (PlayerPrefs.GetInt("Lauched") == 0)
         {
             //First lauching
@@ -197,6 +151,7 @@ public class InitScript : MonoBehaviour
             PlayerPrefs.Save();
         }
 
+        Debug.Log("[InitScript] Awake - 3");
         rate = Instantiate(Resources.Load("Prefabs/Rate")) as GameObject;
         rate.SetActive(false);
         rate.transform.SetParent(GameObject.Find("CanvasGlobal").transform);
@@ -205,6 +160,7 @@ public class InitScript : MonoBehaviour
             .GetComponent<RectTransform>().anchoredPosition;
         rate.transform.localScale = Vector3.one;
 
+        Debug.Log("[InitScript] Awake - 4");
         if (gameObject.GetComponent<AspectCamera>() == null)
             gameObject.AddComponent<AspectCamera>().map = FindObjectOfType<LevelsMap>().transform
                 .Find("map_background_01").GetComponent<SpriteRenderer>()
@@ -213,135 +169,16 @@ public class InitScript : MonoBehaviour
         GameObject.Find("Music").GetComponent<AudioSource>().volume = PlayerPrefs.GetInt("Music");
         SoundBase.Instance.GetComponent<AudioSource>().volume = PlayerPrefs.GetInt("Sound");
 
-#if UNITY_ADS //2.1.1
-        enableUnityAds = true;
-        unityAds = Resources.Load<UnityAdsID>("UnityAdsID");
-
-        gameObject.AddComponent<UnityAdsController>();
-
-        UnityAdsController.Instance.InitAds(unityAds.androidID, unityAds.iOSID);
-
-#else
-        enableUnityAds = false;
-#endif
-#if CHARTBOOST_ADS //1.6.1
-        enableChartboostAds = true;
-#else
-        enableChartboostAds = false;
-#endif
-
-#if FACEBOOK
-        FacebookManager fbManager = gameObject.AddComponent<FacebookManager>();
-        fbManager.facebookButton = facebookButton;
-#endif
-
-
-#if GOOGLE_MOBILE_ADS
-        enableGoogleMobileAds = true; //1.6.1
-#if UNITY_ANDROID
-        MobileAds.Initialize(initStatus => { });
-        // When true all events raised by GoogleMobileAds will be raised
-        // on the Unity main thread. The default value is false.
-        MobileAds.RaiseAdEventsOnUnityMainThread = true;
-        //interstitial = new InterstitialAd(admobUIDAndroid);
-        LoadInterstitialAd(admobUIDAndroid);
-#elif UNITY_IOS
-        MobileAds.Initialize(initStatus => { });
-        MobileAds.RaiseAdEventsOnUnityMainThread = true;
-        LoadInterstitialAd(admobUIDIOS);
-#else
-        MobileAds.Initialize(initStatus => { });
-		MobileAds.RaiseAdEventsOnUnityMainThread = true;
-        LoadInterstitialAd(admobUIDAndroid);
-#endif
-        // Create an empty ad request.
-        requestAdmob = new AdRequest.Builder().Build();
-#else
-        enableGoogleMobileAds = false;//1.6.1
-#endif
+        Debug.Log("[InitScript] Awake - 5");
         Transform canvas = GameObject.Find("CanvasGlobal").transform;
         foreach (Transform item in canvas)
         {
             item.gameObject.SetActive(false);
         }
+        Debug.Log("[InitScript] Awake - End");
     }
 
-#if GOOGLE_MOBILE_ADS
 
-    private AdRequest CreateAdRequest()
-    {
-        return new AdRequest.Builder().Build();
-    }
-
-    public void LoadInterstitialAd(string _adUnitId)
-    {
-        // Clean up the old ad before loading a new one.
-        if (interstitial != null)
-        {
-            interstitial.Destroy();
-            interstitial = null;
-        }
-
-        Debug.Log("Loading the interstitial ad.");
-
-        // send the request to load the ad.
-        // Load an interstitial ad
-        InterstitialAd.Load(_adUnitId, CreateAdRequest(),
-            (InterstitialAd ad, LoadAdError loadError) =>
-            {
-                if (loadError != null)
-                {
-                    Debug.Log("Interstitial ad failed to load with error: " +
-                              loadError.GetMessage());
-                    return;
-                }
-                else if (ad == null)
-                {
-                    Debug.Log("Interstitial ad failed to load.");
-                    return;
-                }
-
-                Debug.Log("Interstitial ad loaded.");
-                interstitial = ad;
-
-                ad.OnAdFullScreenContentOpened += () =>
-                {
-                    Debug.Log("Interstitial ad opening.");
-                    OnAdOpeningEvent.Invoke();
-                };
-                ad.OnAdFullScreenContentClosed += () =>
-                {
-                    Debug.Log("Interstitial ad closed.");
-                    OnAdClosedEvent.Invoke();
-                };
-                ad.OnAdImpressionRecorded += () => { Debug.Log("Interstitial ad recorded an impression."); };
-                ad.OnAdClicked += () => { Debug.Log("Interstitial ad recorded a click."); };
-                ad.OnAdFullScreenContentFailed += (AdError error) =>
-                {
-                    Debug.Log("Interstitial ad failed to show with error: " +
-                              error.GetMessage());
-                };
-                ad.OnAdPaid += (AdValue adValue) =>
-                {
-                    string msg = string.Format("{0} (currency: {1}, value: {2}",
-                        "Interstitial ad received a paid event.",
-                        adValue.CurrencyCode,
-                        adValue.Value);
-                    Debug.Log(msg);
-                };
-            });
-    }
-
-    public void HandleInterstitialLoaded(object sender, EventArgs args)
-    {
-        print("HandleInterstitialLoaded event received.");
-    }
-
-    public void HandleInterstitialFailedToLoad(object sender, AdFailedToLoadEventArgs args)
-    {
-        print("HandleInterstitialFailedToLoad event received with message: " + args.LoadAdError);
-    }
-#endif
 
 
     void Update()
@@ -374,38 +211,12 @@ public class InitScript : MonoBehaviour
 
     public bool GetRewardedUnityAdsReady()
     {
-#if UNITY_ADS
-        return UnityAdsController.Instance.isLoaded;
-#endif
-
         return false;
     }
 
     public void ShowRewardedAds()
     {
-#if UNITY_ADS
-        Debug.Log("show Unity Rewarded ads video in " + LevelManager.THIS.gameStatus);
-
-        if (GetRewardedUnityAdsReady())
-        {
-#if UNITY_ANDROID
-            UnityAdsController.Instance.ShowAds(unityAds.unityRewardedAndroid);
-#elif UNITY_IOS
-                        UnityAdsController.Instance.ShowAds(unityAds.unityRewardedIOS);
-#endif
-        }
-
-#elif GOOGLE_MOBILE_ADS //2.2
-        bool stillShow = true;
-#if UNITY_ADS
-        stillShow = !GetRewardedUnityAdsReady ();
-#endif
-        if(stillShow)
-        {
-            Debug.Log("show Admob Rewarded ads video in " + LevelManager.THIS.gameStatus);
-            RewAdmobManager.THIS.ShowRewardedAd(CheckRewardedAds);
-        }
-#endif
+        Debug.Log("ShowRewardedAds called - no ads configured for WebGL");
     }
 
     public bool RewardedReachedLimit(RewardedAdsType type) //2.2.2
@@ -448,95 +259,23 @@ public class InitScript : MonoBehaviour
 
     void ShowAdByType(AdType adType)
     {
-        //1.4 added
-        if (adType == AdType.AdmobInterstitial && enableGoogleMobileAds)
-            ShowAds(false);
-        else if (adType == AdType.UnityAdsVideo && enableUnityAds)
-            ShowVideo();
-        else if (adType == AdType.UnityAdsInterstitial && enableUnityAds)
-            ShowInterstitial();
-        else if (adType == AdType.ChartboostInterstitial && enableChartboostAds)
-            ShowAds(true);
+        Debug.Log("ShowAdByType called - no ads configured for WebGL");
     }
 
     public void ShowInterstitial()
     {
-        Debug.Log("show Unity ads video on " + LevelManager.THIS.gameStatus + "  for Reward ==> " +
-                  InitScript.Instance.currentReward);
-#if UNITY_ADS
-#if UNITY_ANDROID
-        UnityAdsController.Instance.ShowAds(unityAds.unityInterstitialAndroid);
-
-#elif UNITY_IOS
-            UnityAdsController.Instance.ShowAds(unityAds.unityInterstitialIOS);
-#endif
-#endif
+        Debug.Log("ShowInterstitial called - no ads configured for WebGL");
     }
 
     public void ShowVideo()
     {
-        //1.4 added
-#if UNITY_ADS
-        Debug.Log("show Unity Rewarded ads video in " + LevelManager.THIS.gameStatus + "  for Reward ==> " +
-                  InitScript.Instance.currentReward);
-
-        if (GetRewardedUnityAdsReady())
-        {
-#if UNITY_ANDROID
-            UnityAdsController.Instance.ShowAds(unityAds.unityRewardedAndroid);
-#elif UNITY_IOS
-                        UnityAdsController.Instance.ShowAds(unityAds.unityRewardedIOS);
-#endif
-        }
-#endif
+        Debug.Log("ShowVideo called - no ads configured for WebGL");
     }
 
 
     public void ShowAds(bool chartboost = true)
     {
-        if (chartboost)
-        {
-#if CHARTBOOST_ADS
-            Debug.Log("show Chartboost Interstitial in " + LevelManager.THIS.gameStatus);
-
-            Chartboost.showInterstitial(CBLocation.Default);
-            Chartboost.cacheInterstitial(CBLocation.Default);
-#endif
-        }
-        else
-        {
-#if GOOGLE_MOBILE_ADS
-            Debug.Log("show Google mobile ads Interstitial in " + LevelManager.THIS.gameStatus);
-            if (interstitial != null && interstitial.CanShowAd())
-            {
-                Debug.Log("Showing interstitial ad.");
-                
-                // show ads in mobile device ONLY
-                #if !UNITY_EDITOR
-                interstitial.Show();
-                #endif
-#if UNITY_ANDROID
-                //interstitial = new InterstitialAd(admobUIDAndroid);
-                LoadInterstitialAd(admobUIDAndroid);
-#elif UNITY_IOS
-               // interstitial = new InterstitialAd(admobUIDIOS);
-                     LoadInterstitialAd(admobUIDIOS);
-#else
-			// interstitial = new InterstitialAd (admobUIDAndroid);
-                    LoadInterstitialAd(admobUIDAndroid);
-#endif
-            
-                // show ads in unity editor ONLY
-#if UNITY_EDITOR
-                interstitial.Show();
-#endif
-            }
-            else
-            {
-                Debug.LogError("Interstitial ad is not ready yet.");
-            }
-#endif
-        }
+        Debug.Log("ShowAds called - no ads configured for WebGL");
     }
 
     public void ShowRate()
@@ -691,6 +430,7 @@ public class InitScript : MonoBehaviour
 
     void OnApplicationPause(bool pauseStatus)
     {
+        Debug.Log("[InitScript] OnApplicationPause - Begin, paused: " + pauseStatus);
         if (pauseStatus)
         {
             if (RestLifeTimer > 0)
@@ -702,10 +442,12 @@ public class InitScript : MonoBehaviour
             PlayerPrefs.SetString("DateOfExit", DateTime.Now.ToString());
             PlayerPrefs.Save();
         }
+        Debug.Log("[InitScript] OnApplicationPause - End");
     }
 
     void OnApplicationQuit()
     {
+        Debug.Log("[InitScript] OnApplicationQuit - Begin");
         //1.4  added 
         if (RestLifeTimer > 0)
         {
@@ -715,6 +457,7 @@ public class InitScript : MonoBehaviour
         PlayerPrefs.SetInt("Lifes", lifes);
         PlayerPrefs.SetString("DateOfExit", DateTime.Now.ToString());
         PlayerPrefs.Save();
+        Debug.Log("[InitScript] OnApplicationQuit - End");
         //print(RestLifeTimer)
     }
 
@@ -739,11 +482,14 @@ public class InitScript : MonoBehaviour
 
     void OnEnable()
     {
+        Debug.Log("[InitScript] OnEnable - Begin");
         LevelsMap.LevelSelected += OnLevelClicked;
+        Debug.Log("[InitScript] OnEnable - End");
     }
 
     void OnDisable()
     {
+        Debug.Log("[InitScript] OnDisable - Begin");
         LevelsMap.LevelSelected -= OnLevelClicked;
 
         //		if(RestLifeTimer>0){
@@ -752,119 +498,6 @@ public class InitScript : MonoBehaviour
         PlayerPrefs.SetInt("Lifes", lifes);
         PlayerPrefs.SetString("DateOfExit", DateTime.Now.ToString());
         PlayerPrefs.Save();
-        
-/*#if GOOGLE_MOBILE_ADS
-        interstitial.OnAdLoaded -= HandleInterstitialLoaded;
-        interstitial.OnAdFailedToLoad -= HandleInterstitialFailedToLoad;
-#endif*/
+        Debug.Log("[InitScript] OnDisable - End");
     }
-
-    #region FaceBook
-
-#if FACEBOOK
-    //	public void CallFBInit () {
-    //		FB.Init (OnInitComplete, OnHideUnity);
-    //
-    //	}
-    //
-    //	private void OnInitComplete () {
-    //		Debug.Log ("FB.Init completed: Is user logged in? " + FB.IsLoggedIn);
-    //
-    //	}
-    //
-    //	private void OnHideUnity (bool isGameShown) {
-    //		Debug.Log ("Is game showing? " + isGameShown);
-    //	}
-    //
-    //	void OnGUI () {
-    //		if (LoginEnable) {
-    //			InitScript.Instance.CallFBLogin ();
-    //			LoginEnable = false;
-    //		}
-    //	}
-    //
-    //
-    //	public void CallFBLogin () {
-    //		FB.LogInWithReadPermissions (new List<string> () { "public_profile", "email", "user_friends" }, this.HandleResult);
-    //	}
-    //
-    //	public void CallFBLoginForPublish () {
-    //		// It is generally good behavior to split asking for read and publish
-    //		// permissions rather than ask for them all at once.
-    //		//
-    //		// In your own game, consider postponing this call until the moment
-    //		// you actually need it.
-    //		FB.LogInWithPublishPermissions (new List<string> () { "publish_actions" }, this.HandleResult);
-    //	}
-    //
-    //	void LoginCallback (IPayResult result) {
-    //
-    //		if (result.Error != null)
-    //			lastResponse = "Error Response:\n" + result.Error;
-    //		else if (!FB.IsLoggedIn) {
-    //			lastResponse = "Login cancelled by Player";
-    //		} else {
-    //			lastResponse = "Login was successful!";
-    //			if (loginForSharing) {
-    //				loginForSharing = false;
-    //				Share ();
-    //			}
-    //		}
-    //		Debug.Log (lastResponse);
-    //	}
-    //
-    //	private void CallFBLogout () {
-    //		FB.LogOut ();
-    //	}
-    //
-    //	public void Share () {
-    //		if (!FB.IsLoggedIn) {
-    //			loginForSharing = true;
-    //			LoginEnable = true;
-    //			Debug.Log ("not logged, logging");
-    //		} else {
-    //			FB.FeedShare (
-    //				link: new Uri ("http://apps.facebook.com/" + FB.AppId + "/?challenge_brag=" + (FB.IsLoggedIn ? AccessToken.CurrentAccessToken.UserId : "guest")),
-    //				linkName: FacebookSettings.AppLabels [0],
-    //				linkCaption: "I just scored " + LevelManager.Score + " points! Try to beat me!"
-    //            //picture: "https://fbexternal-a.akamaihd.net/safe_image.php?d=AQCzlvjob906zmGv&w=128&h=128&url=https%3A%2F%2Ffbcdn-photos-h-a.akamaihd.net%2Fhphotos-ak-xtp1%2Ft39.2081-0%2F11891368_513258735497916_1832270581_n.png&cfs=1"
-    //			);
-    //		}
-    //	}
-    //
-    //	protected void HandleResult (IResult result) {
-    //		if (result == null) {
-    //			this.LastResponse = "Null Response\n";
-    //			Debug.Log (this.LastResponse);
-    //			return;
-    //		}
-    //
-    //		//     this.LastResponseTexture = null;
-    //
-    //		// Some platforms return the empty string instead of null.
-    //		if (!string.IsNullOrEmpty (result.Error)) {
-    //			this.Status = "Error - Check log for details";
-    //			this.LastResponse = "Error Response:\n" + result.Error;
-    //			Debug.Log (result.Error);
-    //		} else if (result.Cancelled) {
-    //			this.Status = "Cancelled - Check log for details";
-    //			this.LastResponse = "Cancelled Response:\n" + result.RawResult;
-    //			Debug.Log (result.RawResult);
-    //		} else if (!string.IsNullOrEmpty (result.RawResult)) {
-    //			this.Status = "Success - Check log for details";
-    //			this.LastResponse = "Success Response:\n" + result.RawResult;
-    //			if (loginForSharing) {
-    //				loginForSharing = false;
-    //				Share ();
-    //			}
-    //
-    //			Debug.Log (result.RawResult);
-    //		} else {
-    //			this.LastResponse = "Empty Response\n";
-    //			Debug.Log (this.LastResponse);
-    //		}
-    //	}
-#endif
-
-    #endregion
 }

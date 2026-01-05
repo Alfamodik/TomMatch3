@@ -89,7 +89,6 @@ public class Item : MonoBehaviour
         gameObject.name = "item " + GetInstanceID();
         falling = true;
         GenColor();
-        // sprRenderer = GetComponentInChildren<SpriteRenderer>();
         if (NextType != ItemsTypes.NONE)
         {
             debugType = NextType;
@@ -108,8 +107,6 @@ public class Item : MonoBehaviour
         }
         xScale = transform.localScale.x;
         yScale = transform.localScale.y;
-
-        //StartCoroutine(GenRandomSprite());
     }
 
     public void GenColor(int exceptColor = -1, bool onlyNONEType = false)
@@ -124,36 +121,33 @@ public class Item : MonoBehaviour
             if (col > 1)
             {
                 Square neighbor = LevelManager.Instance.GetSquare(row, col - 1);
-                if (neighbor != null)
+                if (neighbor != null && neighbor.item != null)
                 {
-                    if (neighbor.item != null)
+                    if (neighbor.CanGoInto() && neighbor.item.color == i)
                     {
-                        if (neighbor.CanGoInto() && neighbor.item.color == i)
-                            canGen = false;
+                        canGen = false;
                     }
                 }
             }
             if (col < LevelManager.Instance.maxCols - 1)
             {
                 Square neighbor = LevelManager.Instance.GetSquare(row, col + 1);
-                if (neighbor != null)
+                if (neighbor != null && neighbor.item != null)
                 {
-                    if (neighbor.item != null)
+                    if (neighbor.CanGoOut() && neighbor.item.color == i)
                     {
-                        if (neighbor.CanGoOut() && neighbor.item.color == i)
-                            canGen = false;
+                        canGen = false;
                     }
                 }
             }
             if (row < LevelManager.Instance.maxRows)
             {
                 Square neighbor = LevelManager.Instance.GetSquare(row + 1, col);
-                if (neighbor != null)
+                if (neighbor != null && neighbor.item != null)
                 {
-                    if (neighbor.item != null)
+                    if (neighbor.CanGoOut() && neighbor.item.color == i)
                     {
-                        if (neighbor.CanGoOut() && neighbor.item.color == i)
-                            canGen = false;
+                        canGen = false;
                     }
                 }
             }
@@ -163,7 +157,6 @@ public class Item : MonoBehaviour
             }
         }
 
-        //       print(remainColors.Count);
         int randColor = Random.Range(0, LevelManager.Instance.colorLimit);
         if (remainColors.Count > 0)
             randColor = remainColors[Random.Range(0, remainColors.Count)];
@@ -172,13 +165,21 @@ public class Item : MonoBehaviour
         LevelManager.THIS.lastRandColor = randColor;
         sprRenderer.sprite = items[randColor];
         if (NextType == ItemsTypes.HORIZONTAL_STRIPPED)
+        {
             sprRenderer.sprite = stripedItems[color].horizontal;
+        }
         else if (NextType == ItemsTypes.VERTICAL_STRIPPED)
+        {
             sprRenderer.sprite = stripedItems[color].vertical;
+        }
         else if (NextType == ItemsTypes.PACKAGE)
+        {
             sprRenderer.sprite = packageItems[color];
+        }
         else if (NextType == ItemsTypes.BOMB)
+        {
             sprRenderer.sprite = bombItems[0];
+        }
         else
         {
             var ingredients = LevelManager.THIS.targetObject.Where(i=>i.type == Target.INGREDIENT).ToArray();
@@ -186,8 +187,9 @@ public class Item : MonoBehaviour
             {
                 foreach (var targetObject in ingredients)
                 {
-                    if( Random.Range(0, LevelManager.THIS.Limit) == 0 && square.row + 1 < LevelManager.THIS.maxRows && !onlyNONEType
-                        && !targetObject.Done() && LevelManager.THIS.GetIngredientsCount(targetObject.icon.name) < targetObject.GetCount())
+                    bool shouldBeIngredient = Random.Range(0, LevelManager.THIS.Limit) == 0 && square.row + 1 < LevelManager.THIS.maxRows && !onlyNONEType
+                        && !targetObject.Done() && LevelManager.THIS.GetIngredientsCount(targetObject.icon.name) < targetObject.GetCount();
+                    if(shouldBeIngredient)
                     {
                         StartCoroutine(FallingCor(square, true));
                         color = 1000;
@@ -221,7 +223,6 @@ public class Item : MonoBehaviour
             obj.transform.SetParent(transform);
             obj.transform.localPosition = Vector3.zero;
         }
-
     }
 
     public void SetColor(int col)
@@ -236,14 +237,14 @@ public class Item : MonoBehaviour
         appeared = true;
         StartIdleAnim();
         if (currentType == ItemsTypes.PACKAGE)
+        {
             anim.SetBool("package_idle", true);
-
+        }
     }
 
     public void StartIdleAnim()
     {
         StartCoroutine(AnimIdleStart());
-
     }
 
     IEnumerator AnimIdleStart()
@@ -300,12 +301,9 @@ public class Item : MonoBehaviour
     void ResetDrag()
     {
         dragThis = false;
-        //   transform.position = square.transform.position + Vector3.back * 0.2f;
         switchDirection = Vector3.zero;
-        //    switchItem.transform.position = neighborSquare.transform.position + Vector3.back * 0.2f;
         neighborSquare = null;
         switchItem = null;
-
     }
 
     void Update()
@@ -357,21 +355,25 @@ public class Item : MonoBehaviour
                 neighborSquare = square.GetNeighborTop();
             }
             if (neighborSquare != null)
+            {
                 switchItem = neighborSquare.item;
+            }
             if (switchItem != null)
             {
                 if (switchItem.square.type != SquareTypes.WIREBLOCK)
                     StartCoroutine(Switching());
-                else if ((currentType != ItemsTypes.NONE || switchItem.currentType != ItemsTypes.NONE) && switchItem.square.type != SquareTypes.WIREBLOCK)   //1.4.1   1.6.1
+                else if ((currentType != ItemsTypes.NONE || switchItem.currentType != ItemsTypes.NONE) && switchItem.square.type != SquareTypes.WIREBLOCK)
                     StartCoroutine(Switching());
                 else
-                    ResetDrag();//1.6.1
-
+                {
+                    ResetDrag();
+                }
             }
             else
+            {
                 ResetDrag();
+            }
         }
-
     }
 
     IEnumerator Switching()
@@ -414,14 +416,11 @@ public class Item : MonoBehaviour
             if (matchesHere <= 0 && matchesInNeithborItem <= 0 && LevelManager.THIS.ActivatedBoost.type != BoostType.Hand ||
                 ((currentType == ItemsTypes.BOMB || switchItem.currentType == ItemsTypes.BOMB) && (currentType == ItemsTypes.INGREDIENT || switchItem.currentType == ItemsTypes.INGREDIENT) && (matchesHere + matchesInNeithborItem <= 2)) ||
                 (((int)currentType >= 1 || (int)switchItem.currentType >= 1) && (currentType == ItemsTypes.INGREDIENT || switchItem.currentType == ItemsTypes.INGREDIENT) && (matchesHere + matchesInNeithborItem <= 2)))
-            {//1.6.1
-
-                    neighborSquare.item = switchItem;
-                    square.item = this;
-                    backMove = true;
-                    SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.wrongMatch);
-
-
+            {
+                neighborSquare.item = switchItem;
+                square.item = this;
+                backMove = true;
+                SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.wrongMatch);
             }
             else
             {
@@ -464,7 +463,6 @@ public class Item : MonoBehaviour
                         if (matchesInThisItem >= 5)
                             NextType = ItemsTypes.BOMB;
                     }
-
                 }
                 if (currentType != ItemsTypes.INGREDIENT && switchItem.currentType != ItemsTypes.INGREDIENT)
                 {
@@ -511,7 +509,7 @@ public class Item : MonoBehaviour
             if (backMove)
             {
                 LevelManager.THIS.DragBlocked = false;
-                StartCoroutine(AI.THIS.CheckPossibleCombines());//2.1.5 prevents early move
+                StartCoroutine(AI.THIS.CheckPossibleCombines());
             }
         }
         ResetDrag();
@@ -528,7 +526,6 @@ public class Item : MonoBehaviour
             {
                 if (item != null)
                 {
-
                     bigList.AddRange(LevelManager.THIS.GetItemsAround(item.square));
                 }
             }
@@ -540,7 +537,6 @@ public class Item : MonoBehaviour
                         item.DestroyItem(true, "destroy_package");
                 }
             }
-
             item1.DestroyPackage();
             item2.DestroyPackage();
         }
@@ -553,19 +549,18 @@ public class Item : MonoBehaviour
         {
             int i = 0;
             List<Item> itemsList = LevelManager.THIS.GetItemsAround(item2.square);
-            int direction = 1;//2.0
+            int direction = 1;
             foreach (Item item in itemsList)
             {
                 if (item != null)
                 {
                     if (item.currentType != ItemsTypes.BOMB && item.currentType != ItemsTypes.INGREDIENT)
-                    {//1.6.1
-                        if (direction > 0)//2.0
+                    {
+                        if (direction > 0)
                             item.currentType = ItemsTypes.HORIZONTAL_STRIPPED;
                         else
                             item.currentType = ItemsTypes.VERTICAL_STRIPPED;
                         direction *= -1;
-                        //						item.currentType = (ItemsTypes)((i) % 2) + 1;
                         i++;
                     }
                 }
@@ -577,33 +572,42 @@ public class Item : MonoBehaviour
     public void CheckChocoBomb(Item item1, Item item2)
     {
         if (item1.currentType == ItemsTypes.INGREDIENT || item2.currentType == ItemsTypes.INGREDIENT)
+        {
             return;
+        }
         if (item1.currentType == ItemsTypes.BOMB)
         {
             if (item2.currentType == ItemsTypes.NONE)
+            {
                 DestroyColor(item2.color);
+            }
             else if (item2.currentType == ItemsTypes.HORIZONTAL_STRIPPED || item2.currentType == ItemsTypes.VERTICAL_STRIPPED)
+            {
                 LevelManager.THIS.SetTypeByColor(item2.color, ItemsTypes.HORIZONTAL_STRIPPED);
+            }
             else if (item2.currentType == ItemsTypes.PACKAGE)
+            {
                 LevelManager.THIS.SetTypeByColor(item2.color, ItemsTypes.PACKAGE);
+            }
             else if (item2.currentType == ItemsTypes.BOMB)
+            {
                 LevelManager.THIS.DestroyDoubleBomb(square.col);
-
-
-
+            }
             item1.DestroyItem();
         }
-
     }
 
     void SetStrippedExtra(Vector3 dir)
     {
-        moveDirection = dir;//1.6
-                            //		print ("set striped");
+        moveDirection = dir;
         if (Math.Abs(dir.x) > Math.Abs(dir.y))
+        {
             NextType = ItemsTypes.HORIZONTAL_STRIPPED;
+        }
         else
+        {
             NextType = ItemsTypes.VERTICAL_STRIPPED;
+        }
     }
 
     Vector3 GetDeltaPositionFromSquare(Square sq, Vector3 delta)
@@ -624,7 +628,7 @@ public class Item : MonoBehaviour
     {
         _square.item = this;
         square.item = null;
-        square = _square;   //need to count all falling items and drop them down in the same time
+        square = _square;
     }
 
     public void StartFalling()
@@ -663,7 +667,7 @@ public class Item : MonoBehaviour
         }
         falling = false;
         justCreatedItem = false;
-        transform.position = _square.transform.position + Vector3.back * 0.2f;//1.6.1
+        transform.position = _square.transform.position + Vector3.back * 0.2f;
     }
 
     public bool GetNearEmptySquares()
@@ -707,7 +711,6 @@ public class Item : MonoBehaviour
                 }
             }
         }
-
         return nearEmptySquareDetected;
     }
 
@@ -762,30 +765,35 @@ public class Item : MonoBehaviour
 
     public void ChangeType()
     {
+
         if (this != null)
             StartCoroutine(ChangeTypeCor());
     }
 
     IEnumerator ChangeTypeCor()
     {
+
         if (NextType == ItemsTypes.HORIZONTAL_STRIPPED)
         {
+
             anim.SetTrigger("appear");
             SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.appearStipedColorBomb);
         }
         else if (NextType == ItemsTypes.VERTICAL_STRIPPED)
         {
+
             anim.SetTrigger("appear");
             SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.appearStipedColorBomb);
         }
         else if (NextType == ItemsTypes.PACKAGE)
         {
+
             anim.SetTrigger("appear");
             SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.appearPackage);
-
         }
         else if (NextType == ItemsTypes.BOMB)
         {
+
             anim.SetTrigger("appear");
             SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.appearStipedColorBomb);
             color = 555;
@@ -794,7 +802,10 @@ public class Item : MonoBehaviour
             yield return new WaitForFixedUpdate();
 
         if (NextType == ItemsTypes.NONE)
+        {
+
             yield break;
+        }
         // sprRenderer.enabled = true;
         if (NextType == ItemsTypes.HORIZONTAL_STRIPPED)
             sprRenderer.sprite = stripedItems[color].horizontal;
@@ -825,21 +836,23 @@ public class Item : MonoBehaviour
     {
 
         if (destroying)
+        {
+
             return;
-        // if (nextType != ItemsTypes.NONE) return;
+        }
         if (this == null)
+        {
+
             return;
+        }
         StopCoroutine(AnimIdleStart());
         destroying = true;
         square.item = null;
-        GetComponent<BoxCollider2D>().enabled = false;//2.1.5 prevents to early moving
+        GetComponent<BoxCollider2D>().enabled = false;
 
         if (this == null)
             return;
-
         StartCoroutine(DestroyCor(showScore, anim_name, explEffect));
-
-
     }
 
     IEnumerator DestroyCor(bool showScore = false, string anim_name = "", bool explEffect = false)
@@ -939,9 +952,11 @@ public class Item : MonoBehaviour
 
     public void DestroyHorizontal()
     {
+
         SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.strippedExplosion);
         LevelManager.THIS.StrippedShow(gameObject, true);
         List<Item> itemsList = LevelManager.THIS.GetRow(square.row);
+
         foreach (Item item in itemsList)
         {
             if (item != null)
@@ -956,13 +971,16 @@ public class Item : MonoBehaviour
             if (item != null)
                 item.DestroyBlock();
         }
+
     }
 
     public void DestroyVertical()
     {
+
         SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.strippedExplosion);
         LevelManager.THIS.StrippedShow(gameObject, false);
         List<Item> itemsList = LevelManager.THIS.GetColumn(square.col);
+
         foreach (Item item in itemsList)
         {
             if (item != null)
@@ -978,14 +996,14 @@ public class Item : MonoBehaviour
                 item.DestroyBlock();
         }
 
-
     }
 
     public void DestroyPackage()
     {
-        SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.destroyPackage);
 
+        SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.destroyPackage);
         List<Item> itemsList = LevelManager.THIS.GetItemsAround(square);
+
         foreach (Item item in itemsList)
         {
             if (item != null)
@@ -998,18 +1016,24 @@ public class Item : MonoBehaviour
         SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.explosion);
         currentType = ItemsTypes.NONE;
         DestroyItem(true);
+
     }
 
     public void DestroyColor(int p)
     {
-        SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.colorBombExpl);
 
+        SoundBase.Instance.GetComponent<AudioSource>().PlayOneShot(SoundBase.Instance.colorBombExpl);
         GameObject[] items = GameObject.FindGameObjectsWithTag("Item");
+        int destroyedCount = 0;
         foreach (GameObject item in items)
         {
             if (item.GetComponent<Item>().color == p)
+            {
                 item.GetComponent<Item>().DestroyItem(true, "", true);
+                destroyedCount++;
+            }
         }
+
     }
 
     void PlayDestroyAnimation(string anim_name)
@@ -1020,15 +1044,18 @@ public class Item : MonoBehaviour
 
     public void SmoothDestroy()
     {
+
         StartCoroutine(SmoothDestroyCor());
     }
 
     IEnumerator SmoothDestroyCor()
     {
+
         square.item = null;
-        GetComponent<BoxCollider2D>().enabled = false;//2.1.5 prevents to early moving
+        GetComponent<BoxCollider2D>().enabled = false;
         anim.SetTrigger("disAppear");
         yield return new WaitForSeconds(1);
+
         Destroy(gameObject);
     }
 

@@ -261,14 +261,7 @@ public class LevelMakerEditor : EditorWindow
     void SetScriptingDefineSymbols()
     {
         LevelManager lm = Camera.main.GetComponent<LevelManager>();
-        InitScript initscript = Camera.main.GetComponent<InitScript>();
         string defines = "";
-        if (initscript.enableUnityAds)
-            defines = defines + "; UNITY_ADS";
-        if (initscript.enableGoogleMobileAds)
-            defines = defines + "; GOOGLE_MOBILE_ADS";
-        if (initscript.enableChartboostAds)
-            defines = defines + "; CHARTBOOST_ADS";
         if (lm.FacebookEnable)
             defines = defines + "; FACEBOOK";
         if (lm.enableInApps)
@@ -276,7 +269,6 @@ public class LevelMakerEditor : EditorWindow
         PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, defines);
         PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iOS, defines);
         PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.WP8, defines);
-
     }
 
 
@@ -424,7 +416,6 @@ public class LevelMakerEditor : EditorWindow
     {
         LevelManager lm = Camera.main.GetComponent<LevelManager>();
         InitScript initscript = Camera.main.GetComponent<InitScript>();
-        bool oldenableAds = initscript.enableUnityAds;
 
         GUILayout.Label("Ads settings:", EditorStyles.boldLabel, new GUILayoutOption[] { GUILayout.Width(150) });
         GUILayout.BeginHorizontal();
@@ -509,125 +500,14 @@ public class LevelMakerEditor : EditorWindow
         GUILayout.Space(10);
         //		}
 
-        //GOOGLE MOBILE ADS
-
-        bool oldenableGoogleMobileAds = initscript.enableGoogleMobileAds;
-        GUILayout.BeginHorizontal();
-        //		initscript.enableGoogleMobileAds = EditorGUILayout.Toggle ("Enable Google Mobile Ads", initscript.enableGoogleMobileAds, new GUILayoutOption[] {//1.6.1
-        //			GUILayout.Width (50),
-        //			GUILayout.MaxWidth (200)
-        //		});
-        GUILayout.Label("Google mobile ads", EditorStyles.boldLabel, new GUILayoutOption[] { GUILayout.Width(150) });//1.6.1
-        if (GUILayout.Button("Install", new GUILayoutOption[] { GUILayout.Width(100) }))
-        {
-            Application.OpenURL("https://github.com/googleads/googleads-mobile-unity/releases");//1.6.1
-        }
-        if (GUILayout.Button("Help", new GUILayoutOption[] { GUILayout.Width(80) }))
-        {
-            Application.OpenURL("https://docs.google.com/document/d/1I69mo9yLzkg35wtbHpsQd3Ke1knC5pf7G1Wag8MdO-M/edit?usp=sharing");
-        }
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-        //		if (oldenableGoogleMobileAds != initscript.enableGoogleMobileAds) {//1.6.1
-        //
-        //			SetScriptingDefineSymbols ();
-        //			if (initscript.enableGoogleMobileAds) {
-        //				enableGoogleAdsProcessing = true;
-        //			}
-        //		}
-        //		if (initscript.enableGoogleMobileAds) {
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(20);
-        initscript.admobUIDAndroid = EditorGUILayout.TextField("Admob Interstitial ID Android ", initscript.admobUIDAndroid, new GUILayoutOption[] {
-            GUILayout.Width (220),
-            GUILayout.MaxWidth (220)
-        });
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(20);
-        initscript.admobUIDIOS = EditorGUILayout.TextField("Admob Interstitial ID iOS", initscript.admobUIDIOS, new GUILayoutOption[] {
-            GUILayout.Width (220),
-            GUILayout.MaxWidth (220)
-        });
-        GUILayout.EndHorizontal();
-        GUILayout.Space(10);
-        GUILayout.BeginHorizontal();//2.2
-        GUILayout.Space(20);
-        initscript.admobRewardedUIDAndroid = EditorGUILayout.TextField("Admob Rewarded ID Android ", initscript.admobRewardedUIDAndroid, new GUILayoutOption[] {
-            GUILayout.Width (220),
-            GUILayout.MaxWidth (220)
-        });
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(20);
-        initscript.admobRewardedUIDIOS = EditorGUILayout.TextField("Admob Rewarded ID iOS", initscript.admobRewardedUIDIOS, new GUILayoutOption[] {
-            GUILayout.Width (220),
-            GUILayout.MaxWidth (220)
-        });
-        GUILayout.EndHorizontal();
-
         GUILayout.BeginHorizontal();
         {
-            initscript.dailyRewardedFrequency = EditorGUILayout.IntField(new GUIContent("Show rewarded ads ", "Show rewarded ads for a period, 0 - infinity. Influences to Rewarded Admob and Unity ads"), initscript.dailyRewardedFrequency, new GUILayoutOption[] { GUILayout.Width(300) });//2.2.2
+            initscript.dailyRewardedFrequency = EditorGUILayout.IntField(new GUIContent("Show rewarded ads ", "Show rewarded ads for a period, 0 - infinity"), initscript.dailyRewardedFrequency, new GUILayoutOption[] { GUILayout.Width(300) });
             EditorGUILayout.LabelField("per", new GUILayoutOption[] { GUILayout.Width(30) });
             initscript.dailyRewardedFrequencyTime = (RewardedAdsTime)EditorGUILayout.EnumPopup(initscript.dailyRewardedFrequencyTime, new GUILayoutOption[] { GUILayout.Width(50) });
-
         }
         GUILayout.EndHorizontal();
         GUILayout.Space(10);
-
-        //		}
-
-        //CHARTBOOST ADS
-
-        GUILayout.BeginHorizontal();
-        bool oldenableChartboostAds = initscript.enableChartboostAds;
-        //		initscript.enableChartboostAds = EditorGUILayout.Toggle ("Enable Chartboost Ads", initscript.enableChartboostAds, new GUILayoutOption[] {//1.6.1
-        //			GUILayout.Width (50),
-        //			GUILayout.MaxWidth (200)
-        //		});
-        GUILayout.Label("Chartboost ads", EditorStyles.boldLabel, new GUILayoutOption[] { GUILayout.Width(150) });//1.6.1
-        if (GUILayout.Button("Install", new GUILayoutOption[] { GUILayout.Width(100) }))
-        {
-            Application.OpenURL("http://www.chartboo.st/sdk/unity");//1.6.1
-
-        }
-        if (GUILayout.Button("Help", new GUILayoutOption[] { GUILayout.Width(80) }))
-        {
-            Application.OpenURL("https://docs.google.com/document/d/1ibnQbuxFgI4izzyUtT45WH5m1ab3R5d1E3ke3Wrb10Y");
-        }
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-        //		if (oldenableChartboostAds != initscript.enableChartboostAds) {//1.6.1
-        //			SetScriptingDefineSymbols ();
-        //			if (initscript.enableChartboostAds) {
-        //				enableChartboostAdsProcessing = true;
-        //			}
-        //
-        //		}
-        if (initscript.enableChartboostAds)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            EditorGUILayout.LabelField("menu Chartboost->Edit settings", new GUILayoutOption[] {
-                GUILayout.Width (50),
-                GUILayout.MaxWidth (200)
-            });
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            EditorGUILayout.LabelField("Put ad ID to appropriate platform to prevent crashing!", EditorStyles.boldLabel, new GUILayoutOption[] {
-                GUILayout.Width (100),
-                GUILayout.MaxWidth (400)
-            });
-            GUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
-        }
 
 
         GUILayout.Space(10);

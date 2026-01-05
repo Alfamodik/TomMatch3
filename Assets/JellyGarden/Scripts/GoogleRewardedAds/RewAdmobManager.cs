@@ -42,68 +42,7 @@ public class RewAdmobManager : MonoBehaviour
 
         private void RequestRewardBasedVideo()
         {
-#if UNITY_ANDROID
-            string adUnitId = InitScript.Instance.admobRewardedUIDAndroid;
-#elif UNITY_IPHONE
-            string adUnitId = InitScript.Instance.admobRewardedUIDIOS;
-#else
-            string adUnitId = "unexpected_platform";
-#endif
-            
-                 // create new rewarded ad instance
-        RewardedAd.Load(adUnitId, CreateAdRequest(),
-            (RewardedAd ad, LoadAdError loadError) =>
-            {
-                if (loadError != null)
-                {
-                    Debug.Log("Rewarded ad failed to load with error: " +
-                                loadError.GetMessage());
-                    return;
-                }
-                else if (ad == null)
-                {
-                    Debug.Log("Rewarded ad failed to load.");
-                    return;
-                }
-
-                Debug.Log("Rewarded ad loaded.");
-                rewardBasedVideo = ad;
-
-                ad.OnAdFullScreenContentOpened += () =>
-                {
-                    Debug.Log("Rewarded ad opening.");
-                    OnAdOpeningEvent.Invoke();
-                };
-                ad.OnAdFullScreenContentClosed += () =>
-                {
-                    Debug.Log("Rewarded ad closed.");
-                    OnAdClosedEvent.Invoke();
-                    RequestRewardBasedVideo();
-                };
-                ad.OnAdImpressionRecorded += () =>
-                {
-                    Debug.Log("Rewarded ad recorded an impression.");
-                };
-                ad.OnAdClicked += () =>
-                {
-                    Debug.Log("Rewarded ad recorded a click.");
-                };
-                ad.OnAdFullScreenContentFailed += (AdError error) =>
-                {
-                    Debug.Log("Rewarded ad failed to show with error: " +
-                              error.GetMessage());
-                    RequestRewardBasedVideo();
-                };
-                ad.OnAdPaid += (AdValue adValue) =>
-                {
-                    string msg = string.Format("{0} (currency: {1}, value: {2}",
-                                               "Rewarded ad received a paid event.",
-                                               adValue.CurrencyCode,
-                                               adValue.Value);
-                    Debug.Log(msg);
-                    RequestRewardBasedVideo();
-                };
-            });
+            Debug.Log("RequestRewardBasedVideo - ads disabled for WebGL");
         }
 
         public bool IsRewardedAdIsLoaded()

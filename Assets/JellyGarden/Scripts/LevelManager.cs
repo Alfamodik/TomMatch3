@@ -793,16 +793,14 @@ public class LevelManager : MonoBehaviour
         if (LevelManager.THIS.gameStatus == GameState.Playing)
         {
             Vector3? pos = null;
-            #if !UNITY_EDITOR
             if (Input.touchCount > 0)
             {
                 if (Input.touches[0].phase == TouchPhase.Began)
                     pos = Input.GetTouch(0).position;
                 if (Input.touches[0].phase == TouchPhase.Ended)
-                                    pos = Vector3.zero;
+                    pos = Vector3.zero;
             }
-#elif UNITY_EDITOR
-            if (Input.GetMouseButtonDown(0))
+            else if (Input.GetMouseButtonDown(0))
             {
                 pos = Input.mousePosition;
             }
@@ -810,7 +808,6 @@ public class LevelManager : MonoBehaviour
             {
                 pos = Vector3.zero;
             }
-            #endif
             if (pos != null)
             {
                 OnStartPlay();
