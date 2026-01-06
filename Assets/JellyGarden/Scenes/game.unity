@@ -16721,10 +16721,10 @@ RectTransform:
   - {fileID: 828963096}
   m_Father: {fileID: 915674654}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 346}
+  m_SizeDelta: {x: 0, y: 346}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &631821850
 MonoBehaviour:
@@ -25775,10 +25775,10 @@ RectTransform:
   - {fileID: 432957319}
   m_Father: {fileID: 1970235630}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 346}
+  m_SizeDelta: {x: 0, y: 346}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!111 &915674655
 Animation:
@@ -48343,7 +48343,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u041F\u0440\u043E\u043B\u043E\u0434\u0436\u0438\u0442\u044C"
+  m_text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c839e837c32dd2241a9c6a5a386efe09, type: 2}
   m_sharedMaterial: {fileID: -3128850043282232344, guid: c839e837c32dd2241a9c6a5a386efe09,
@@ -48553,8 +48553,8 @@ MonoBehaviour:
       de: 
       hi: 
   text: 
-  ru: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439"
-  en: Prolonged
+  ru: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C"
+  en: Continue
   tr: 
   az: 
   be: 
@@ -48585,7 +48585,7 @@ MonoBehaviour:
   uniqueFont: {fileID: 0}
   additionalText: {fileID: 0}
   textHeight: 20
-  processTranslateLabel: 2/19 completed
+  processTranslateLabel: 2/2 completed
   componentTextField: 1
   countLang: 2
 --- !u!1 &1500686055
