@@ -691,9 +691,9 @@ public class LevelManager : MonoBehaviour
                 Limit--;
             item.NextType = (ItemsTypes)UnityEngine.Random.Range(1, 3);
             item.ChangeType();
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.2f);
         }
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.1f);
         while (GetAllExtaItems().Count > 0 && gameStatus != GameState.Win)
         { //1.6
             Item item = GetAllExtaItems()[0];
@@ -1577,7 +1577,7 @@ public class LevelManager : MonoBehaviour
         {
 
             //find matches
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.05f);
 
             combinedItems.Clear();
             combinedItems = combineManager.GetCombine(); //GetMatches();  //1.6
@@ -1623,7 +1623,7 @@ public class LevelManager : MonoBehaviour
                 {//TODO items not destroy
 
                     if (item.currentType != ItemsTypes.NONE)
-                        yield return new WaitForSeconds(0.1f);
+                        yield return new WaitForSeconds(0.05f);
                     item.DestroyItem(true);  //destroy items safely
                     if (item.currentType != ItemsTypes.NONE)
                     {
@@ -1668,7 +1668,7 @@ public class LevelManager : MonoBehaviour
 
             while (!IsAllDestoyFinished())
             {
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.05f);
             }
 
             //falling down
@@ -1685,7 +1685,7 @@ public class LevelManager : MonoBehaviour
                 // yield return new WaitForFixedUpdate();
             }
             if (!nearEmptySquareDetected)
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.1f);
 
             CheckIngredient();
             for (int col = 0; col < maxCols; col++)
@@ -1708,13 +1708,13 @@ public class LevelManager : MonoBehaviour
                     }
                 }
             }
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
             GenerateNewItems();
             StartCoroutine(RegenMatches(true));
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.05f);
             while (!IsAllItemsFallDown())
             {
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.05f);
             }
 
             //detect near empty squares to fall into
@@ -1747,7 +1747,7 @@ public class LevelManager : MonoBehaviour
             //CheckIngredient();
             while (!IsAllItemsFallDown())
             {//2.0
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.05f);
             }
 
             if (destroyAnyway.Count > 0)

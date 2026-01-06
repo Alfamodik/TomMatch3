@@ -642,9 +642,9 @@ public class Item : MonoBehaviour
         falling = true;
         float startTime = Time.time;
         Vector3 startPos = transform.position;
-        float speed = 10;
+        float speed = 13;
         if (LevelManager.THIS.gameStatus == GameState.PreWinAnimations)
-            speed = 10;
+            speed = 13;
         float distance = Vector3.Distance(startPos, _square.transform.position);
         float fracJourney = 0;
         if (distance > 0.5f)
